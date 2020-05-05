@@ -1,0 +1,25 @@
+{
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "",
+                "limitSymbolsToIncludedHeaders": true
+            },
+            "includePath": [
+                "/home/benjamin/projects/AAU/rob4/devel/include/**",
+                "/opt/ros/kinetic/include/**",
+                "/home/benjamin/projects/AAU/first_semester/catkin_ws/src/brain/include/**",
+                "/home/benjamin/projects/hexapod/P6/sim/src/hex_code/include/**",
+                "/home/benjamin/projects/AAU/first_semester/catkin_ws/src/image/include/**",
+                "/home/benjamin/projects/AAU/rob4/src/ssvep/include/**",
+                "/usr/include/**"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17"
+        }
+    ],
+    "version": 4
+}

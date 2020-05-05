@@ -1,0 +1,1151 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot name="henry" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:property name="inertMult" value="2"/>
+
+  <xacro:include filename="$(find henry)/urdf/macros.xacro" />
+  <xacro:include filename="$(find henry)/urdf/camera.xacro" />
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>/henry</robotNamespace>
+      <legacyModeNS>true</legacyModeNS>
+    </plugin>
+  </gazebo>
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-0.0046879 0.00025786 -0.024583"
+        rpy="0 0 0" />
+      <mass value="0.4" />
+      <inertia
+        ixx="${inertMult*0.00036969}"
+        ixy="${inertMult*-1.8597E-09}"
+        ixz="${inertMult*1.4525E-11}"
+        iyy="${inertMult*0.00082591}"
+        iyz="${inertMult*-5.5712E-13}"
+        izz="${inertMult*0.0011914}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.79216 0.81961 0.93333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <!--<gazebo>
+    <joint name="fixed to ground" type="fixed">
+      <parent>world</parent>
+      <child>base_link</child>
+    </joint>
+  </gazebo>-->
+
+  <link
+    name="rf1">
+    <inertial>
+      <origin
+        xyz="0.0235528512093693 -0.020826192962814 -0.0302933245541285"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*2.80209196283728E-4}"
+        ixy="${inertMult*1.08131234296969E-4}"
+        ixz="${inertMult*2.75056522885508E-5}"
+        iyy="${inertMult*2.83277425761214E-4}"
+        iyz="${inertMult*-2.74214067312994E-5}"
+        izz="${inertMult*4.36206678652634E-4}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rf1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rf1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rf1"
+    type="revolute">
+    <origin
+      xyz="0.08544 -0.0712421380034565 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rf1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="rf2">
+    <inertial>
+      <origin
+        xyz="0.0405982711644819 0.000570943902844859 0.00272767087698819"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*7.34918300742933E-5}"
+        ixy="${inertMult*3.03191722172581E-6}"
+        ixz="${inertMult*-3.70952093144039E-9}"
+        iyy="${inertMult*1.39467233299725E-3}"
+        iyz="${inertMult*-1.6998843347057E-8}"
+        izz="${inertMult*1.46141347444567E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rf2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rf2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rf2"
+    type="revolute">
+    <origin
+      xyz="0.0498941615872737 -0.0126635753443007 -0.0252249999999195"
+      rpy="1.57079632679957 0 -0.785398163397453" />
+    <parent
+      link="rf1" />
+    <child
+      link="rf2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="rf3">
+    <inertial>
+      <origin
+        xyz="0.030746685329639 0.00581198997841281 0.024214043271956"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*1.37425168937468E-4}"
+        ixy="${inertMult*-5.96009824225112E-5}"
+        ixz="${inertMult*-1.51952350412923E-6}"
+        iyy="${inertMult*2.40782507356475E-3}"
+        iyz="${inertMult*5.92160489854381E-8}"
+        izz="${inertMult*2.48684865160645E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rf3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rf3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rf3"
+    type="revolute">
+    <origin
+      xyz="0.0809400000000001 0 0"
+      rpy="0 0 -1.5707963267949" />
+    <parent
+      link="rf2" />
+    <child
+      link="rf3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="rc1">
+    <inertial>
+      <origin
+        xyz="0.00195774786319519 -0.0313788835896384 -0.0302933245888657"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*3.89871446574245E-4}"
+        ixy="${inertMult*1.73886119475934E-6}"
+        ixz="${inertMult*9.63422334992831E-8}"
+        iyy="${inertMult*1.7361517492709E-4}"
+        iyz="${inertMult*-3.88392221066064E-5}"
+        izz="${inertMult*4.36206678117347E-4}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rc1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rc1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rc1"
+    type="revolute">
+    <origin
+      xyz="-0.000280000000000002 -0.0712421380034565 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rc1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="rc2">
+    <inertial>
+      <origin
+        xyz="0.0405982711645078 0.00057094390099513 0.00272767087698933"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*7.34918300745685E-5}"
+        ixy="${inertMult*3.03191728174958E-6}"
+        ixz="${inertMult*-3.70952092584378E-9}"
+        iyy="${inertMult*1.39467233299697E-3}"
+        iyz="${inertMult*-1.69988434764393E-8}"
+        izz="${inertMult*1.46141347444567E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rc2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rc2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rc2"
+    type="revolute">
+    <origin
+      xyz="0.0263678682941496 -0.0442100556755142 -0.025225000016047"
+      rpy="1.57079632648337 0 -1.56984956345733" />
+    <parent
+      link="rc1" />
+    <child
+      link="rc2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="rc3">
+    <inertial>
+      <origin
+        xyz="0.0307466854169628 0.00588067737007236 0.0243771531374058"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*1.37425168417602E-4}"
+        ixy="${inertMult*-5.96009823207913E-5}"
+        ixz="${inertMult*-1.51952418736513E-6}"
+        iyy="${inertMult*2.407825073057E-3}"
+        iyz="${inertMult*5.92160790774337E-8}"
+        izz="${inertMult*2.48684865158969E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rc3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rc3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rc3"
+    type="revolute">
+    <origin
+      xyz="0.0809400000000001 0 0"
+      rpy="0 0 -1.5707963267949" />
+    <parent
+      link="rc2" />
+    <child
+      link="rc3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="rr1">
+    <inertial>
+      <origin
+        xyz="-0.020826192962595 -0.0235528512095888 -0.0302933245514761"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*2.83277425760865E-4}"
+        ixy="${inertMult*-1.08131234297001E-4}"
+        ixz="${inertMult*-2.74214067361587E-5}"
+        iyy="${inertMult*2.8020919628414E-4}"
+        iyz="${inertMult*-2.75056522848591E-5}"
+        izz="${inertMult*4.36206678652569E-4}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rr1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rr1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rr1"
+    type="revolute">
+    <origin
+      xyz="-0.086 -0.0712421380034565 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="rr1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="rr2">
+    <inertial>
+      <origin
+        xyz="0.0406018470840636 0.000188711015329995 0.00272767087698916"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*7.36660117671631E-5}"
+        ixy="${inertMult*1.5468924958192E-5}"
+        ixz="${inertMult*-3.86939011899469E-9}"
+        iyy="${inertMult*1.39449815130438E-3}"
+        iyz="${inertMult*-1.69631673087003E-8}"
+        izz="${inertMult*1.46141347444567E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rr2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rr2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rr2"
+    type="revolute">
+    <origin
+      xyz="-0.0126635753438549 -0.04989416158772 -0.0252250000063468"
+      rpy="1.57079632625951 0 -2.35619449019235" />
+    <parent
+      link="rr1" />
+    <child
+      link="rr2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="rr3">
+    <inertial>
+      <origin
+        xyz="0.0307466853202159 0.00604704032400294 0.0244490936237297"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*1.37425168939121E-4}"
+        ixy="${inertMult*-5.96009824225431E-5}"
+        ixz="${inertMult*-1.51952356307675E-6}"
+        iyy="${inertMult*2.40782507356477E-3}"
+        iyz="${inertMult*5.92160488947209E-8}"
+        izz="${inertMult*2.48684865160482E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rr3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/rr3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="rr3"
+    type="revolute">
+    <origin
+      xyz="0.0809364130415041 -0.000761999983634964 0"
+      rpy="0 0 -1.5707963267949" />
+    <parent
+      link="rr2" />
+    <child
+      link="rr3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lf1">
+    <inertial>
+      <origin
+        xyz="0.0235528512117585 0.0208261929604247 -0.0302735311599137"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*2.80209196283935E-4}"
+        ixy="${inertMult*-1.08131234296964E-4}"
+        ixz="${inertMult*2.72323239203144E-5}"
+        iyy="${inertMult*2.83277425760998E-4}"
+        iyz="${inertMult*2.7316569478678E-5}"
+        izz="${inertMult*4.36206678652641E-4}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lf1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lf1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lf1"
+    type="revolute">
+    <origin
+      xyz="0.08544 0.0717578619965436 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="lf1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lf2">
+    <inertial>
+      <origin
+        xyz="0.0403417288355181 -0.000570943902839599 0.00272767087698922"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*7.3491830074293E-5}"
+        ixy="${inertMult*3.03191722172586E-6}"
+        ixz="${inertMult*3.70952092513264E-9}"
+        iyy="${inertMult*1.39467233299725E-3}"
+        iyz="${inertMult*1.69988434766385E-8}"
+        izz="${inertMult*1.46141347444568E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lf2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lf2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lf2"
+    type="revolute">
+    <origin
+      xyz="0.0498941615922769 0.0126635753392966 -0.0252250000172937"
+      rpy="-1.57079632672594 0 0.785398163397447" />
+    <parent
+      link="lf1" />
+    <child
+      link="lf2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lf3">
+    <inertial>
+      <origin
+        xyz="0.0307466853278542 -0.00602994524685957 0.0260946980111213"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*1.37425168937687E-4}"
+        ixy="${inertMult*5.98683858974909E-5}"
+        ixz="${inertMult*-1.54870612875527E-6}"
+        iyy="${inertMult*2.40782507356514E-3}"
+        iyz="${inertMult*5.92160529511617E-8}"
+        izz="${inertMult*2.48684865160661E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lf3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.250980392156863 0.250980392156863 0.250980392156863 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lf3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lf3"
+    type="revolute">
+    <origin
+      xyz="0.08094 0 0"
+      rpy="0 0 1.5707963267949" />
+    <parent
+      link="lf2" />
+    <child
+      link="lf3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lc1">
+    <inertial>
+      <origin
+        xyz="0.00192803858393814 0.0313807230631082 -0.0302735311824728"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*3.8987454530716E-4}"
+        ixy="${inertMult*-1.53411464105366E-6}"
+        ixz="${inertMult*-5.95706545298219E-8}"
+        iyy="${inertMult*1.73612076201849E-4}"
+        iyz="${inertMult*3.85718924307615E-5}"
+        izz="${inertMult*4.3620667813206E-4}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lc1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lc1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lc1"
+    type="revolute">
+    <origin
+      xyz="-0.000280000000000002 0.0717578619965436 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="lc1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lc2">
+    <inertial>
+      <origin
+        xyz="0.0403417288355178 -0.00057094390286537 0.00272767087698922"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*7.34918300742966E-5}"
+        ixy="${inertMult*3.03191722256945E-6}"
+        ixz="${inertMult*3.70952092523351E-9}"
+        iyy="${inertMult*1.39467233299724E-3}"
+        iyz="${inertMult*1.69988434766255E-8}"
+        izz="${inertMult*1.46141347444567E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lc2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lc2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lc2"
+    type="revolute">
+    <origin
+      xyz="0.0263259999929037 0.0442350000043007 -0.0252250000001304"
+      rpy="-1.57079632678482 0 1.57079632695827" />
+    <parent
+      link="lc1" />
+    <child
+      link="lc2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lc3">
+    <inertial>
+      <origin
+        xyz="0.0307466854250601 -0.00619615097168205 0.0243775625296757"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*1.37425168414352E-4}"
+        ixy="${inertMult*5.98683858952716E-5}"
+        ixz="${inertMult*-1.54870592856779E-6}"
+        iyy="${inertMult*2.40782507304459E-3}"
+        iyz="${inertMult*5.92160931767252E-8}"
+        izz="${inertMult*2.48684865159404E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lc3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lc3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lc3"
+    type="revolute">
+    <origin
+      xyz="0.08094 0 0"
+      rpy="0 0 1.5707963267949" />
+    <parent
+      link="lc2" />
+    <child
+      link="lc3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lr1">
+    <inertial>
+      <origin
+        xyz="-0.0208261929659262 0.0235528512004297 -0.0302735311546928"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*2.83277425724582E-4}"
+        ixy="${inertMult*1.08131234297783E-4}"
+        ixz="${inertMult*-2.73165694801783E-5}"
+        iyy="${inertMult*2.80209196319722E-4}"
+        iyz="${inertMult*2.7232323915657E-5}"
+        izz="${inertMult*4.36206678653271E-4}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lr1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lr1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lr1"
+    type="revolute">
+    <origin
+      xyz="-0.086 0.0717578619965436 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="lr1" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lr2">
+    <inertial>
+      <origin
+        xyz="0.0403417288355134 -0.000570943903171306 0.00272767087698921"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*7.3491830074343E-5}"
+        ixy="${inertMult*3.03191723259017E-6}"
+        ixz="${inertMult*3.7095209252147E-9}"
+        iyy="${inertMult*1.39467233299719E-3}"
+        iyz="${inertMult*1.69988434766074E-8}"
+        izz="${inertMult*1.46141347444567E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lr2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lr2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lr2"
+    type="revolute">
+    <origin
+      xyz="-0.0126635753735047 0.0498941615577912 -0.0252250000047146"
+      rpy="-1.57079632676752 0 2.35619449035488" />
+    <parent
+      link="lr1" />
+    <child
+      link="lr2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+  <link
+    name="lr3">
+    <inertial>
+      <origin
+        xyz="0.0307466853285799 -0.00767529766885171 0.0239763065013317"
+        rpy="0 0 0" />
+      <mass value="0.04" />
+      <inertia
+        ixx="${inertMult*1.37425168938545E-4}"
+        ixy="${inertMult*5.98683859161893E-5}"
+        ixz="${inertMult*-1.54870602135808E-6}"
+        iyy="${inertMult*2.40782507356392E-3}"
+        iyz="${inertMult*5.92160395982802E-8}"
+        izz="${inertMult*2.48684865160651E-3}" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lr3.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.627450980392157 0.627450980392157 0.627450980392157 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://henry/meshes/lr3.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lr3"
+    type="revolute">
+    <origin
+      xyz="0.0809400000000001 0 0"
+      rpy="0 0 1.5707963267949" />
+    <parent
+      link="lr2" />
+    <child
+      link="lr3" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="-1.719147861"
+      upper="1.719147861"
+      effort="2"
+      velocity="0"/>
+  </joint>
+
+  <gazebo reference="rf3">
+    <mu1>999999</mu1>
+    <mu2>999999</mu2>
+    <minDepth>0.01</minDepth>
+  </gazebo>
+  <gazebo reference="rc3">
+    <mu1>999999</mu1>
+    <mu2>999999</mu2>
+    <minDepth>0.01</minDepth>
+  </gazebo>
+  <gazebo reference="rr3">
+    <mu1>999999</mu1>
+    <mu2>999999</mu2>
+    <minDepth>0.01</minDepth>
+  </gazebo>
+  <gazebo reference="lf3">
+    <mu1>999999</mu1>
+    <mu2>999999</mu2>
+    <minDepth>0.01</minDepth>
+  </gazebo>
+  <gazebo reference="lc3">
+    <mu1>999999</mu1>
+    <mu2>999999</mu2>
+    <minDepth>0.01</minDepth>
+  </gazebo>
+  <gazebo reference="lr3">
+    <mu1>999999</mu1>
+    <mu2>999999</mu2>
+    <minDepth>0.01</minDepth>
+  </gazebo>
+
+
+
+  <trans name = "rf1"/>
+  <trans name = "rf2"/>
+  <trans name = "rf3"/>
+
+  <trans name = "rc1"/>
+  <trans name = "rc2"/>
+  <trans name = "rc3"/>
+
+  <trans name = "rr1"/>
+  <trans name = "rr2"/>
+  <trans name = "rr3"/>
+
+  <trans name = "lf1"/>
+  <trans name = "lf2"/>
+  <trans name = "lf3"/>
+
+  <trans name = "lc1"/>
+  <trans name = "lc2"/>
+  <trans name = "lc3"/>
+
+  <trans name = "lr1"/>
+  <trans name = "lr2"/>
+  <trans name = "lr3"/>
+
+
+</robot>

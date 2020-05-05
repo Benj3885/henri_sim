@@ -1,0 +1,43 @@
+<launch>
+
+  <!-- Load joint controller configurations from YAML file to parameter server -->
+  <rosparam file="$(find henry)/config/config.yaml" command="load"/>
+
+  <!-- load the controllers -->
+  <node name="controller_spawner"
+    pkg="controller_manager"
+    type="spawner" respawn="false"
+    output="screen" ns="/henry"
+    args="joint_state_controller
+      rf1_controller
+      rf2_controller
+      rf3_controller
+      
+      rc1_controller
+      rc2_controller
+      rc3_controller
+      
+      rr1_controller
+      rr2_controller
+      rr3_controller
+      
+      lf1_controller
+      lf2_controller
+      lf3_controller
+      
+      lc1_controller
+      lc2_controller
+      lc3_controller
+      
+      lr1_controller
+      lr2_controller
+      lr3_controller"/>
+
+
+  <!-- convert joint states to TF transforms for rviz, etc -->
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen">
+    <param name="robot_description" command="$(find xacro)/xacro '$(find henry)/urdf/henry.xacro'" />
+    <remap from="/joint_states" to="/henry/joint_states" />
+  </node>
+
+</launch>

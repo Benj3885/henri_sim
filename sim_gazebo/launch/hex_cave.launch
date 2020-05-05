@@ -1,0 +1,16 @@
+<launch>
+  <!-- We resume the logic in empty_world.launch, changing only the name of the world to be launched -->
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(find sim_gazebo)/worlds/hex_cave.world"/>
+    <!-- more default parameters can be changed here -->
+  </include>
+
+  <include file="$(find cave_desc)/launch/spawn_cave.launch" />
+
+  <param name="robot_description" command="$(find xacro)/xacro '$(find henry)/urdf/henry.xacro'" />
+
+	<include file="$(find henry)/launch/control.launch" />
+
+  <node name="henry_spawn" pkg="gazebo_ros" type="spawn_model" output="screen"
+	args="-urdf -param robot_description -model henry -x 0 -y 0 -z 0.5"/>
+</launch>

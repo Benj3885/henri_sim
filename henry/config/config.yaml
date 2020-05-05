@@ -1,0 +1,85 @@
+henry:
+  # Publish all joint states -----------------------------------
+  joint_state_controller:
+    type: joint_state_controller/JointStateController
+    publish_rate: 20  
+
+  # Position Controllers ---------------------------------------
+  rf1_controller:
+    type: effort_controllers/JointPositionController
+    joint: rf1
+    pid: {p: 200.0, i: 0.005, d: 4}
+  rf2_controller:
+    type: effort_controllers/JointPositionController
+    joint: rf2
+    pid: {p: 200.0, i: 0.005, d: 4}
+  rf3_controller:
+    type: effort_controllers/JointPositionController
+    joint: rf3
+    pid: {p: 200.0, i: 0.005, d: 4}
+
+  rc1_controller:
+    type: effort_controllers/JointPositionController
+    joint: rc1
+    pid: {p: 200.0, i: 0.005, d: 4}
+  rc2_controller:
+    type: effort_controllers/JointPositionController
+    joint: rc2
+    pid: {p: 200.0, i: 0.005, d: 4}
+  rc3_controller:
+    type: effort_controllers/JointPositionController
+    joint: rc3
+    pid: {p: 200.0, i: 0.005, d: 4}
+
+  rr1_controller:
+    type: effort_controllers/JointPositionController
+    joint: rr1
+    pid: {p: 200.0, i: 0.005, d: 4}
+  rr2_controller:
+    type: effort_controllers/JointPositionController
+    joint: rr2
+    pid: {p: 200.0, i: 0.005, d: 4}
+  rr3_controller:
+    type: effort_controllers/JointPositionController
+    joint: rr3
+    pid: {p: 200.0, i: 0.005, d: 4}
+
+  lf1_controller:
+    type: effort_controllers/JointPositionController
+    joint: lf1
+    pid: {p: 200.0, i: 0.005, d: 4}
+  lf2_controller:
+    type: effort_controllers/JointPositionController
+    joint: lf2
+    pid: {p: 200.0, i: 0.005, d: 4}
+  lf3_controller:
+    type: effort_controllers/JointPositionController
+    joint: lf3
+    pid: {p: 200.0, i: 0.005, d: 4}
+
+  lc1_controller:
+    type: effort_controllers/JointPositionController
+    joint: lc1
+    pid: {p: 200.0, i: 0.005, d: 4}
+  lc2_controller:
+    type: effort_controllers/JointPositionController
+    joint: lc2
+    pid: {p: 200.0, i: 0.005, d: 4}
+  lc3_controller:
+    type: effort_controllers/JointPositionController
+    joint: lc3
+    pid: {p: 200.0, i: 0.005, d: 4}
+
+  lr1_controller:
+    type: effort_controllers/JointPositionController
+    joint: lr1
+    pid: {p: 200.0, i: 0.005, d: 4}
+  lr2_controller:
+    type: effort_controllers/JointPositionController
+    joint: lr2
+    pid: {p: 200.0, i: 0.005, d: 4}
+  lr3_controller:
+    type: effort_controllers/JointPositionController
+    joint: lr3
+    pid: {p: 200.0, i: 0.005, d: 4}
+  
