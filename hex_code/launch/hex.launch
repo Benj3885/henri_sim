@@ -1,0 +1,16 @@
+<launch>
+    <node pkg="hex_code" type="control" name="control" output="screen">
+        <param name="/use_sim_time" value="true"/>
+    </node>
+
+    <node pkg="log_hex" type="log" name="gaz_log_node" output="screen"/>
+
+    <!-- Launch the grid map visualizer -->
+    <node pkg="grid_map_visualization" type="grid_map_visualization" name="grid_map_visualization" output="screen">
+        <rosparam command="load" file="$(find hex_code)/config/map.yaml" />
+    </node>
+
+    <!-- Launch RViz with the demo configuration -->
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find hex_code)/rviz/map.rviz" />
+
+</launch>

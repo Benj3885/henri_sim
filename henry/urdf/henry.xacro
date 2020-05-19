@@ -5,6 +5,9 @@
 <robot name="henry" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
   <xacro:property name="inertMult" value="2"/>
+  <xacro:property name="j1Effort" value="4"/>
+  <xacro:property name="j2Effort" value="6"/>
+  <xacro:property name="j3Effort" value="4"/>
 
   <xacro:include filename="$(find henry)/urdf/macros.xacro" />
   <xacro:include filename="$(find henry)/urdf/camera.xacro" />
@@ -117,7 +120,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j1Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -174,7 +177,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j2Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -227,11 +230,11 @@
     <child
       link="rf3" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 -1" />
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j3Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -288,7 +291,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j1Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -345,7 +348,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j2Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -398,11 +401,11 @@
     <child
       link="rc3" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 -1" />
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j3Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -459,7 +462,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j1Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -516,7 +519,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j2Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -569,11 +572,11 @@
     <child
       link="rr3" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 -1" />
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j3Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -630,7 +633,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j1Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -687,7 +690,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j2Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -740,11 +743,11 @@
     <child
       link="lf3" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 -1" />
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j3Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -801,7 +804,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j1Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -858,7 +861,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j2Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -911,11 +914,11 @@
     <child
       link="lc3" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 -1" />
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j3Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -972,7 +975,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j1Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -1029,7 +1032,7 @@
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j2Effort}"
       velocity="0"/>
   </joint>
   <link
@@ -1082,46 +1085,44 @@
     <child
       link="lr3" />
     <axis
-      xyz="0 0 1" />
+      xyz="0 0 -1" />
     <limit
       lower="-1.719147861"
       upper="1.719147861"
-      effort="2"
+      effort="${j3Effort}"
       velocity="0"/>
   </joint>
 
   <gazebo reference="rf3">
     <mu1>999999</mu1>
     <mu2>999999</mu2>
-    <minDepth>0.01</minDepth>
+    <minDepth>0.02</minDepth>
   </gazebo>
   <gazebo reference="rc3">
     <mu1>999999</mu1>
     <mu2>999999</mu2>
-    <minDepth>0.01</minDepth>
+    <minDepth>0.02</minDepth>
   </gazebo>
   <gazebo reference="rr3">
     <mu1>999999</mu1>
     <mu2>999999</mu2>
-    <minDepth>0.01</minDepth>
+    <minDepth>0.02</minDepth>
   </gazebo>
   <gazebo reference="lf3">
     <mu1>999999</mu1>
     <mu2>999999</mu2>
-    <minDepth>0.01</minDepth>
+    <minDepth>0.02</minDepth>
   </gazebo>
   <gazebo reference="lc3">
     <mu1>999999</mu1>
     <mu2>999999</mu2>
-    <minDepth>0.01</minDepth>
+    <minDepth>0.02</minDepth>
   </gazebo>
   <gazebo reference="lr3">
     <mu1>999999</mu1>
     <mu2>999999</mu2>
-    <minDepth>0.01</minDepth>
+    <minDepth>0.02</minDepth>
   </gazebo>
-
-
 
   <trans name = "rf1"/>
   <trans name = "rf2"/>
@@ -1146,6 +1147,4 @@
   <trans name = "lr1"/>
   <trans name = "lr2"/>
   <trans name = "lr3"/>
-
-
 </robot>

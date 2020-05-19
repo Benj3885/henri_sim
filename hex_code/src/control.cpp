@@ -7,15 +7,16 @@
 #include <thread>
 #include <unistd.h>
 #include <mutex>
-#include "motion.h"
 #include "ros/ros.h"
 #include "std_msgs/Float64.h"
+#include <ros/spinner.h>
+#include <ros/callback_queue.h>
+#include "rosgraph_msgs/Clock.h"
 
 controller::controller(ros::NodeHandle *mainn){
     n = mainn;
 
-    time_move = 550;
-    speed_max = 1000;
+    time_move = 0.1; // Seconds
 
     mtx = new std::mutex;
 
@@ -36,7 +37,7 @@ void controller::main(){
     cont[7] = n->advertise<std_msgs::Float64>("/henry/rr2_controller/command", 1);
     cont[8] = n->advertise<std_msgs::Float64>("/henry/rr3_controller/command", 1);
 
-    cont[9] = n->advertise<std_msgs::Float64>("/henry/lf1_controller/command", 1);
+    cont[9]  = n->advertise<std_msgs::Float64>("/henry/lf1_controller/command", 1);
     cont[10] = n->advertise<std_msgs::Float64>("/henry/lf2_controller/command", 1);
     cont[11] = n->advertise<std_msgs::Float64>("/henry/lf3_controller/command", 1);
 
@@ -104,23 +105,13 @@ void controller::control_gait(){
 void controller::tri_gait(bool dir){
     int ang = (dir ? -1 : RESOLUTION);
     bool first_state = 1;
-
-    float speed;
-
-    auto time = std::chrono::steady_clock::now();
+    
+    ros::Rate r(10);
     
     while(1){
         if(!(dir ? mp.W : mp.S)){
             return;
         }
-
-        //mtx->lock();
-
-        speed = mp.speed / 100.0;
-
-       // mtx->unlock();
-
-        time += std::chrono::milliseconds((int)(time_move / speed));
 
         ang = (dir ? ang + 1 : ang - 1);
 
@@ -130,6 +121,7 @@ void controller::tri_gait(bool dir){
         }
 
         if(first_state){
+            //printf("Was I here twice?\n");
             for(int serv = 0; serv < 3; serv++){
                 //First part up
                 save_command(servo_id[0][serv], k.part1rf[serv][ang], off_set[0][serv]);
@@ -153,10 +145,11 @@ void controller::tri_gait(bool dir){
                 save_command(servo_id[3][serv], k.part1lf[serv][ang], off_set[3][serv]); //LeftFrontLeg
                 save_command(servo_id[5][serv], k.part1lb[serv][ang], off_set[5][serv]); //LeftBackLeg
             }
+            //printf("%d:   %f\n", servo_id[0][1], k.part2rf[1][ang] * M_PI / 180.0);
         }
 
         send_command();
-        std::this_thread::sleep_until(time);
+        r.sleep();
     }
 }
 
@@ -166,24 +159,12 @@ void controller::climb_gait(bool dir){
     int ang = (dir ? -1 : RESOLUTION);
     char state = 0;
 
-    float speed;
-
-    auto time = std::chrono::steady_clock::now();
+    ros::Rate r(10);
     
     while(1){
         if(!(dir ? mp.W : mp.S)){
             return;
         }
-
-        //mtx->lock();
-
-        speed = mp.speed / 100.0;
-
-        //mtx->unlock();
-
-        
-
-        time += std::chrono::milliseconds((int)(time_move / speed));
 
         ang = (dir ? ang + 1 : ang - 1);
 
@@ -236,20 +217,21 @@ void controller::climb_gait(bool dir){
         }
 
         send_command();
-        std::this_thread::sleep_until(time);
+        r.sleep();
     }
 }
 
 
 void controller::save_command(char id, float angle, short int off_set){
     mess[id].data = angle * M_PI / 180.0; 
+    //printf("id:   %d\n", id);
 }
 
 void controller::send_command(){
-    printf("%f\n", mess[0].data);
     for(int i = 0; i < 18; i++){
         cont[i].publish(mess[i]);
     }
+    //printf("send:   %f\n", mess[1].data);
 }
 
 
@@ -264,7 +246,7 @@ void controller::go_to_zero(){
 
 
     send_command();
-    usleep(200000);
+    ros::Duration(0.2).sleep();
 
     for(int i = 0; i < 2; i++){
         save_command(servo_id[0+i][1], 45,          off_set[0+i][1]);
@@ -272,26 +254,25 @@ void controller::go_to_zero(){
         save_command(servo_id[4+i][1], -45,         off_set[4+i][1]);
 
         send_command();
-        usleep(200000);
+        ros::Duration(0.2).sleep();
 
         for(int j = 0; j < 3; j++)
             save_command(servo_id[j*2+i][0], 0, off_set[j*2+i][0]);
 
         send_command();
-        usleep(200000);
+        ros::Duration(0.2).sleep();
 
         for(int j = 1; j < 3; j++)
             for(int k = 0; k < 3; k++)
                 save_command(servo_id[k*2+i][j], 0, off_set[k*2+i][j]);
 
         send_command();
-        usleep(200000);
+        ros::Duration(0.2).sleep();
     }
 }
 
 void controller::turn(bool ccw){
-    auto time_interval = std::chrono::milliseconds(time_move);
-    auto time = std::chrono::steady_clock::now() + time_interval;
+    ros::Rate r(10);
 
     newRound: for(int ang = 0; ang < RESOLUTION; ang++){
         for(int serv = 0; serv < 3; serv++){
@@ -304,8 +285,7 @@ void controller::turn(bool ccw){
         }
 
         send_command();
-        std::this_thread::sleep_until(time);
-        time += time_interval;
+        r.sleep();
     }
 
     for(int ang = 0; ang < RESOLUTION; ang++){
@@ -317,8 +297,7 @@ void controller::turn(bool ccw){
         
 
         send_command();
-        std::this_thread::sleep_until(time);
-        time += time_interval;
+        r.sleep();
     }
 
     for(int ang = 0; ang < RESOLUTION; ang++){
@@ -329,8 +308,7 @@ void controller::turn(bool ccw){
         }
 
         send_command();
-        std::this_thread::sleep_until(time);
-        time += time_interval;
+        r.sleep();
     }
 
     if((ccw ? mp.A : mp.D))
@@ -350,6 +328,12 @@ kinematics::kinematics(){
     create_gait(pointPosfc, part1rfc, part2rfc, part1lfc, part2lfc);
     create_gait(pointPosc, part1rc, part2rc, part1lc, part2lc);
     create_gait(pointPosb, part1rb, part2rb, part1lb, part2lb);
+
+    /*for(int i = 0; i < 10; i++){
+        printf("%f   ", part1rf[1][i] * M_PI / 180.0);
+        printf("%f   ", part2rf[1][i] * M_PI / 180.0);
+        printf("\n");
+    }*/
 
     create_turn_gait(turnPos, rc, -M_PI/2, M_PI/2, off_set_coordc, part1rrotc, part2rrotc, part1lrotc, part2lrotc);
     create_turn_gait(turnPos, rfb, -0.7444, M_PI/4, off_set_coordf, part1rrotf, part2rrotf, part1lrotf, part2lrotf);

@@ -8,7 +8,6 @@
 #include <chrono>
 #include <thread>
 #include <mutex>
-#include "motion.h"
 
 pi_comm::pi_comm(const char *IP, const int PORT){
     read_mtx = new std::mutex();
@@ -20,14 +19,14 @@ pi_comm::pi_comm(const char *IP, const int PORT){
 
     sockfd = socket(AF_INET, SOCK_STREAM , 0);
 
-    if(connect(sockfd, (struct sockaddr *) &server, sizeof(server)) < 0)
+    /*if(connect(sockfd, (struct sockaddr *) &server, sizeof(server)) < 0)
     {
         printf("Connection to laptop failed\n");
         exit(0);
     }
 
     std::thread commthread(&pi_comm::main, this);
-    commthread.detach();
+    commthread.detach();*/
 }
 
 void pi_comm::main(){

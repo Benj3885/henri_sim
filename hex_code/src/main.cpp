@@ -1,7 +1,6 @@
 #include "comm.h"
-#include "motion.h"
 #include "control.h"
-#include "laser.h"
+#include "map_nav.h"
 #include <stdio.h>
 #include <chrono>
 #include <thread>
@@ -14,43 +13,33 @@
 out_data od;
 in_state is;
 move_para mp;
-pos_lidar pl;
-obstacle obs;
 
-void decide_all(pi_comm *comm, imu *im, laser *l, controller *cont);
+void decide_all(pi_comm *comm, controller *cont);
 
 int main(int argc, char *argv[]){
 
     ros::init(argc, argv, "henry");
-
-    ros::NodeHandle n;
+    
+    ros::NodeHandle n1, n2;
     
     pi_comm comm = pi_comm(IP, PORT);
 
-    imu im;
+    controller cont = controller(&n1);
+    
+    map_nav mn = map_nav(&n1, &n2);
 
-    controller cont = controller(&n);
-
-    laser l;
-
-    int interval = 20;
-    auto time_interval = std::chrono::milliseconds(interval);
-    auto time = std::chrono::steady_clock::now();
+    ros::Rate r(10);
     
     while(1){
-        time += time_interval;
-        decide_all(&comm, &im, &l, &cont);
-        std::this_thread::sleep_until(time);
+        decide_all(&comm, &cont);
+        r.sleep();
     }
 
     return 0;
 }
 
-void decide_all(pi_comm *comm, imu *im, laser *l, controller *cont){
+void decide_all(pi_comm *comm, controller *cont){
     is = comm->read_data();
-
-    mp.gait = is.gait;
-    mp.speed = is.speed;
 
     if(is.W == 1 && is.S == 0){
         od.os.W = 1;
@@ -87,19 +76,6 @@ void decide_all(pi_comm *comm, imu *im, laser *l, controller *cont){
     }
 
     cont->write_mp(mp);
-
-    od.id = im->read_integrated_data();
-    
-    pl.x = od.id.x.f;
-    pl.y = od.id.y.f;
-    pl.rz = od.id.rz.f;
-
-    l->write_pos(pl);
-    obs = l->read_obs();
-
-    od.os.speed = is.speed;
-    od.os.gait = is.gait;
-    od.os.obstacle = obs.flag;
 
     comm->write_od(&od);
 }

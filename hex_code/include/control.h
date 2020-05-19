@@ -3,10 +3,10 @@
 #include "control.h"
 #include <sstream>
 #include <math.h>
-#include "motion.h"
 #include <mutex>
 #include "ros/ros.h"
 #include "std_msgs/Float64.h"
+#include "rosgraph_msgs/Clock.h"
 
 struct hex_command{
     int i = -1;
@@ -17,7 +17,7 @@ struct hex_command{
 
 struct move_para{
     bool W, A, S, D;
-    uint8_t speed;
+    float turn;
     uint8_t gait;
 };
 
@@ -88,14 +88,14 @@ struct controller{
     std::mutex *mtx;
 
     int fd;
-    int time_move;
+    float time_move;
     int speed_max;
 
     kinematics k;
 
     //ids and offset
     //RIght side first from front to back
-    char servo_id[6][3] = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {9, 10, 1}, {12, 13, 14}, {15, 16, 17}};
+    char servo_id[6][3] = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {9, 10, 11}, {12, 13, 14}, {15, 16, 17}};
     short int off_set[6][3] = {{1455, 1614, 1463}, {1538, 1500, 1518}, {1549, 1558, 1461}, {1538, 1469, 1479}, {1529, 1500, 1566}, {1562, 1517, 1471}};
 
     controller(ros::NodeHandle *mainn);

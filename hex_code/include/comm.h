@@ -1,7 +1,6 @@
 #ifndef COMM_H
 #define COMM_H
 #include "comm.h"
-#include "motion.h"
 #include <sys/socket.h>    //socket
 #include <arpa/inet.h> //inet_addr
 #include <poll.h>
@@ -21,6 +20,18 @@ struct out_state{
     uint8_t speed = 0;
     uint8_t gait = 0;
     bool obstacle = 0;
+};
+
+union fval{
+    float f = 0;
+    char c[4];
+};
+
+struct integrated_data{
+    fval x, y, z;
+    fval vx, vy, vz;
+    fval rx, ry, rz;
+    fval temp;
 };
 
 struct out_data{

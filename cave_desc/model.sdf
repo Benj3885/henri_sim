@@ -10,6 +10,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_StartingArea.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="starting_area_visual">
         <geometry>
@@ -25,6 +33,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_01.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_01_visual">
         <geometry>
@@ -40,6 +56,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_02.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_02_visual">
         <geometry>
@@ -55,6 +79,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_03.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_03_visual">
         <geometry>
@@ -70,6 +102,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_04.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_04_visual">
         <geometry>
@@ -85,6 +125,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_05.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_05_visual">
         <geometry>
@@ -100,6 +148,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_06.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_06_visual">
         <geometry>
@@ -115,6 +171,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_07.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_07_visual">
         <geometry>
@@ -130,6 +194,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_08.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_08_visual">
         <geometry>
@@ -145,6 +217,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_09.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_09_visual">
         <geometry>
@@ -160,6 +240,14 @@
             <uri>/home/benjamin/projects/hexapod/P6/sim/src/cave_desc/meshes/Edgar_Section_10.DAE</uri>
           </mesh>
         </geometry>
+        <surface>
+          <friction>
+            <ode>
+              <mu>100</mu>
+              <mu2>100</mu2>
+            </ode>
+          </friction>
+        </surface>
       </collision>
       <visual name="section_10_visual">
         <geometry>
