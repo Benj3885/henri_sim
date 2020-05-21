@@ -27,6 +27,8 @@ map_nav::map_nav(ros::NodeHandle *mainn1, ros::NodeHandle *mainn2){
     nm = mainn1;
     nn = mainn2;
 
+    mtx = new std::mutex;
+
     std::thread mapthread(&map_nav::map_main, this);
     mapthread.detach();
 
@@ -60,6 +62,15 @@ void map_nav::map_main(){
 
 
 void map_nav::imcb(const log_hex::logConstPtr& msg){
+    mtx->lock();
+    rs.x = msg->pose.position.x;
+    rs.y = msg->pose.position.y;
+    rs.rz = std::atan2(
+        2 * (msg->pose.orientation.w * msg->pose.orientation.z + msg->pose.orientation.x * msg->pose.orientation.y),
+        1 - 2 * (msg->pose.orientation.y * msg->pose.orientation.y + msg->pose.orientation.z * msg->pose.orientation.z)
+    );
+    mtx->unlock();
+
     cv::Mat im = cv_bridge::toCvCopy(msg->im, sensor_msgs::image_encodings::TYPE_32FC1)->image;
 
     float reading;
@@ -72,7 +83,7 @@ void map_nav::imcb(const log_hex::logConstPtr& msg){
     tf::Quaternion q;
     tf::quaternionMsgToTF(msg->pose.orientation, q);
     tf::Transform t(q, tf::Vector3(tfScalar(p.getX()), tfScalar(p.getY()), tfScalar(p.getZ())));
-
+    
     for(int i = 0; i < IM_WIDTH; i++){
         for(int j = 0; j < IM_HEIGHT; j++){
             reading = im.at<float>(j, i);
@@ -110,6 +121,7 @@ void map_nav::setPos(float x, float y, float z){
     map.getIndex(grid_map::Position(x, y), idx);
 
     nMap[idx(0)][idx(1)].z = z;
+    nMap[idx(0)][idx(1)].mapped = 1;
 
     checkObs(IndexFixed(idx));
 }
@@ -147,7 +159,7 @@ void map_nav::checkObs(IndexFixed idx){
 }
 
 void map_nav::insertObsQueue(IndexFixed idx){
-    if (std::find(obsQueue.begin(), obsQueue.end(), idx) != obsQueue.end())
+    if (std::find(obsQueue.begin(), obsQueue.end(), idx) == obsQueue.end())
         obsQueue.push_back(idx);
 }
 
@@ -169,6 +181,7 @@ void map_nav::spreadO(){
             while(!obsVec[vIdx].empty()){
                 x = obsVec[vIdx].back().x;
                 y = obsVec[vIdx].back().y;
+                nMap[x][y].O = i;
                 nMap[x][y].O = i;
 
                 if(x < TOTAL_IDX - 2)
@@ -203,30 +216,256 @@ void map_nav::spreadO(){
 }
 
 void map_nav::insertObsVec(std::vector<IndexFixed> &vec, IndexFixed val){
-    if (std::find(vec.begin(), vec.end(), val) != vec.end())
+    if (std::find(vec.begin(), vec.end(), val) == vec.end())
         vec.push_back(val);
 }
 
 
 void map_nav::nav_main(){
-    ros::CallbackQueue tarQueue;
-    nn->setCallbackQueue(&tarQueue);
+    tarQueue = new ros::CallbackQueue();
+    nn->setCallbackQueue(tarQueue);
+
+    activeNeurons.reserve(10000);
+    pendingNeurons.reserve(1000);
 
     ros::Subscriber tarSub = nn->subscribe<geometry_msgs::PoseStamped>("/move_base_simple/goal", 1, &map_nav::tarCB, this);
 
     while(1){
-
+        tarQueue->callAvailable(ros::WallDuration(0.1));
     }
 }
 
 void map_nav::tarCB(const geometry_msgs::PoseStampedConstPtr& msg){
+    rs.gx = msg->pose.position.x;
+    rs.gy = msg->pose.position.y;
+    rs.grz = std::atan2(
+        2 * (msg->pose.orientation.w * msg->pose.orientation.z + msg->pose.orientation.x * msg->pose.orientation.y),
+        1 - 2 * (msg->pose.orientation.y * msg->pose.orientation.y + msg->pose.orientation.z * msg->pose.orientation.z)
+    );
 
+    grid_map::Index target;
+
+    map.getIndex(grid_map::Position(rs.gx, rs.gy), target);
+    rs.gxg = target(0);
+    rs.gyg = target(1);
+
+    map.getIndex(grid_map::Position(rs.x, rs.y), target);
+    rs.xg = target(0);
+    rs.yg = target(1);
+
+    DWENN();
 }
 
+void map_nav::DWENN(){
+    if(!ins(rs.gxg, rs.gyg) || !nMap[rs.gxg][rs.gyg].mapped || nMap[rs.gxg][rs.gyg].O){
+        std::cout << "Target not in allowed space, seek permission from space" << std::endl;
+        return;
+    }
 
+    nMap[rs.gxg][rs.gyg].val = 1;
+    nMap[rs.gxg][rs.gyg].stage = 2;
 
+    activateNeighbourNeurons();
 
+    int x, y;
 
+    x = rs.xg;
+    y = rs.yg;
 
+    while(rs.xg != rs.gxg && rs.yg != rs.gyg){
 
+        while(nMap[rs.xg][rs.yg].stage != 2 || x != rs.xg || y != rs.yg){
+            if(!tarQueue->empty()){
+                resetNMap();
+                return;
+            }
+
+            updateActiveNeurons();
+
+            if(nMap[rs.gxg][rs.gyg].stage == 0 && pendingNeurons.empty()){
+                std::cout << "404: path not found" << std::endl;
+            }
+
+            updatePendingNeurons();
+        }
+
+        // INSERT MOVEMENT STUFF
+
+    }
+}
+
+void map_nav::updateActiveNeurons(){
+    int x, y;
+
+    for(int i = 0; i < activeNeurons.size(); i++){
+        x = activeNeurons[i].x;
+        y = activeNeurons[i].y;
+        if(nMap[x][y].O){
+            nMap[x][y].deactivate();
+            activeNeurons.erase(activeNeurons.begin()+i);
+            continue;
+        }
+        if(nMap[x][y].wp->val){
+            findPend(IndexFixed(x, y));
+            nMap[x][y].val++;
+            continue;
+        }
+        if(!findActiveNeighbour(x, y)){
+            nMap[x][y].deactivate();
+            activeNeurons.erase(activeNeurons.begin()+i);
+            continue;
+        }
+        findPend(IndexFixed(x, y));
+    }
+}
+
+void map_nav::updatePendingNeurons(){
+    int x, y;
+
+    while(!pendingNeurons.empty()){
+        x = pendingNeurons.back().x;
+        y = pendingNeurons.back().y;
+        
+        if(nMap[x][y].formerVal){
+            nMap[x][y].formerVal = 0;
+            nMap[x][y].stage = 0;
+            pendingNeurons.pop_back();
+            continue;
+        }
+        if(!findActiveNeighbour(x, y)){
+            nMap[x][y].stage = 0;
+        }
+
+        pendingNeurons.pop_back();
+    }
+}
+
+bool map_nav::findActiveNeighbour(int x, int y){
+    if(ins(x+1, y)){
+        if(!nMap[x+1][y].O && nMap[x+1][y].stage == 2 && nMap[x+1][y].val < nMap[x][y].val){
+            nMap[x][y].activate(nMap[x+1][y].val + 1, 3, &nMap[x+1][y]);
+            return 1;
+        }
+    }
+    if(ins(x-1, y)){
+        if(!nMap[x-1][y].O && !nMap[x-1][y].stage == 2 && nMap[x-1][y].val < nMap[x][y].val){
+            nMap[x][y].activate(nMap[x-1][y].val + 1, 1, &nMap[x-1][y]);
+            return 1;
+        }
+    }
+    if(ins(x, y+1)){
+        if(!nMap[x][y+1].O && !nMap[x][y+1].stage == 2 && nMap[x][y+1].val < nMap[x][y].val){
+            nMap[x][y].activate(nMap[x][y+1].val + 1, 4, &nMap[x][y+1]);
+            return 1;
+        }
+    }
+    if(ins(x, y-1)){
+        if(!nMap[x][y-1].O && !nMap[x][y-1].stage == 2 && nMap[x][y-1].val < nMap[x][y].val){
+            nMap[x][y].activate(nMap[x][y-1].val + 1, 2, &nMap[x][y-1]);
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+void map_nav::activateNeighbourNeurons(){
+    IndexFixed temp;
+    if(ins(rs.gxg+1, rs.gyg)){
+        if(!nMap[rs.gxg+1][rs.gyg].O && !nMap[rs.gxg+1][rs.gyg].stage && nMap[rs.gxg+1][rs.gyg].mapped){
+            nMap[rs.gxg+1][rs.gyg].activate(1, 3, &nMap[rs.gxg][rs.gyg]);
+            temp.write(rs.gxg+1, rs.gyg);
+            activeNeurons.push_back(temp);
+            findPend(temp);
+        }
+    }
+    if(ins(rs.gxg-1, rs.gyg)){
+        if(!nMap[rs.gxg-1][rs.gyg].O && !nMap[rs.gxg-1][rs.gyg].stage && nMap[rs.gxg-1][rs.gyg].mapped){
+            nMap[rs.gxg-1][rs.gyg].activate(1, 1, &nMap[rs.gxg][rs.gyg]);
+            temp.write(rs.gxg-1, rs.gyg);
+            activeNeurons.push_back(temp);
+            findPend(temp);
+        }
+    }
+    if(ins(rs.gxg, rs.gyg+1)){
+        if(!nMap[rs.gxg][rs.gyg+1].O && !nMap[rs.gxg][rs.gyg+1].stage && nMap[rs.gxg][rs.gyg+1].mapped){
+            nMap[rs.gxg][rs.gyg+1].activate(1, 4, &nMap[rs.gxg][rs.gyg]);
+            temp.write(rs.gxg, rs.gyg+1);
+            activeNeurons.push_back(temp);
+            findPend(temp);
+        }
+    }
+    if(ins(rs.gxg, rs.gyg-1)){
+        if(!nMap[rs.gxg][rs.gyg-1].O && !nMap[rs.gxg][rs.gyg-1].stage && nMap[rs.gxg][rs.gyg-1].mapped){
+            nMap[rs.gxg][rs.gyg-1].activate(1, 2, &nMap[rs.gxg][rs.gyg]);
+            temp.write(rs.gxg, rs.gyg-1);
+            activeNeurons.push_back(temp);
+            findPend(temp);
+        }
+    }
+}
+
+void map_nav::findPend(IndexFixed idx){
+    IndexFixed temp;
+    if(ins(idx.x+1, idx.y)){
+        if(!nMap[idx.x+1][idx.y].O && !nMap[idx.x+1][idx.y].stage && nMap[idx.x+1][idx.y].mapped){
+            temp = idx;
+            temp.x++;
+            pendingNeurons.push_back(temp);
+            nMap[idx.x+1][idx.y].stage = 1;
+        }
+    }
+    if(ins(idx.x-1, idx.y)){
+        if(!nMap[idx.x-1][idx.y].O && !nMap[idx.x-1][idx.y].stage && nMap[idx.x-1][idx.y].mapped){
+            temp = idx;
+            temp.x--;
+            pendingNeurons.push_back(temp);
+            nMap[idx.x-1][idx.y].stage = 1;
+        }
+    }
+    if(ins(idx.x, idx.y+1)){
+        if(!nMap[idx.x][idx.y+1].O && !nMap[idx.x][idx.y+1].stage && nMap[idx.x][idx.y+1].mapped){
+            temp = idx;
+            temp.y++;
+            pendingNeurons.push_back(temp);
+            nMap[idx.x][idx.y+1].stage = 1;
+        }
+    }
+    if(ins(idx.x, idx.y-1)){
+        if(!nMap[idx.x][idx.y-1].O && !nMap[idx.x][idx.y-1].stage && nMap[idx.x][idx.y-1].mapped){
+            temp = idx;
+            temp.y--;
+            pendingNeurons.push_back(temp);
+            nMap[idx.x][idx.y-1].stage = 1;
+        }
+    }
+}
+
+bool map_nav::ins(int x, int y){
+    return (x >= 0 && x < TOTAL_IDX && y >= 0 && y < TOTAL_IDX);
+}
+
+void map_nav::resetNMap(){
+    unsigned int x, y;
+    while(!activeNeurons.empty()){
+        x = activeNeurons.back().x;
+        y = activeNeurons.back().y;
+
+        nMap[x][y].val = 0;
+        nMap[x][y].formerVal = 0;
+        nMap[x][y].w = 0;
+        nMap[x][y].wp = NULL;
+        nMap[x][y].stage = 0;
+        activeNeurons.pop_back();
+    }
+
+    while(!pendingNeurons.empty()){
+        x = pendingNeurons.back().x;
+        y = pendingNeurons.back().y;
+
+        nMap[x][y].formerVal = 0;
+        nMap[x][y].stage = 0;
+        pendingNeurons.pop_back();
+    }
+}
 

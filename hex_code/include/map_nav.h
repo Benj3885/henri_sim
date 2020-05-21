@@ -11,6 +11,7 @@
 #include "vector"
 #include "control.h"
 #include "geometry_msgs/PoseStamped.h"
+#include <ros/callback_queue.h>
 
 #define IM_WIDTH 100
 #define IM_HEIGHT 80
@@ -23,11 +24,28 @@
 
 struct neuron{
     float z = NAN;
-    int val = 0;
-    int formerVal = 0;
+    unsigned int val = 0;
+    char stage = 0;
+    bool formerVal = 0;
     int O = 0;
     char w = 0;
-    neuron *wp = 0;
+    neuron *wp = NULL;
+    bool mapped = 0;
+
+    void activate(unsigned int valIn, char wIn, neuron *wpIn){
+        val = valIn;
+        stage = 2;
+        formerVal = 1;
+        w = wIn;
+        wp = wpIn;
+    }
+
+    void deactivate(){
+        val = 0;
+        stage = 0;
+        wp = NULL;
+        w = 0;
+    }
 };
 
 struct IndexFixed{
@@ -43,17 +61,31 @@ struct IndexFixed{
         y = 0;
     }
 
+    IndexFixed(int xIn, int yIn){
+        x = xIn;
+        y = yIn;
+    }
+
     bool operator==(IndexFixed idx) {
 	    return x == idx.x && y == idx.y;
+    }
+
+    void write(int xIn, int yIn){
+        x = xIn;
+        y = yIn;
     }
 };
 
 struct robotState{
     float x, y, rz;
+    int xg, yg;
     move_para mp;
+    float gx, gy, grz;
+    int gxg, gyg;
 };
 
 struct map_nav{
+    std::mutex *mtx;
     ros::NodeHandle *nm;
     ros::Publisher mpub;
 
@@ -79,9 +111,24 @@ struct map_nav{
 
     robotState rs;
     ros::NodeHandle *nn;
+    std::vector<IndexFixed> activeNeurons;
+    std::vector<IndexFixed> pendingNeurons;
+    ros::CallbackQueue *tarQueue;
 
     void nav_main();
     void tarCB(const geometry_msgs::PoseStampedConstPtr& msg);
+    void DWENN();
+    
+    
+    void updateActiveNeurons();
+    void updatePendingNeurons();
+    void activateNeighbourNeurons();
+    void resetNMap();
+
+    bool ins(int x, int y);
+    void checkPend(IndexFixed idx);
+    void findPend(IndexFixed idx);
+    bool findActiveNeighbour(int x, int y);
 };
 
 
