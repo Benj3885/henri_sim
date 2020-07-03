@@ -16,9 +16,8 @@ struct hex_command{
 };
 
 struct move_para{
-    bool W, A, S, D;
+    bool W, S;
     float turn;
-    uint8_t gait;
 };
 
 struct kinematics{
@@ -96,7 +95,7 @@ struct controller{
     //ids and offset
     //RIght side first from front to back
     char servo_id[6][3] = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}, {9, 10, 11}, {12, 13, 14}, {15, 16, 17}};
-    short int off_set[6][3] = {{1455, 1614, 1463}, {1538, 1500, 1518}, {1549, 1558, 1461}, {1538, 1469, 1479}, {1529, 1500, 1566}, {1562, 1517, 1471}};
+    float turnLimit = M_PI/9;
 
     controller(ros::NodeHandle *mainn);
 
@@ -105,12 +104,12 @@ struct controller{
     void tri_gait(bool dir);
     void climb_gait(bool dir);
     void go_to_zero();
-    void turn(bool p);
+    void turn(float turn);
     void control_gait();
+    void go_to_gait_start();
 
-    void save_command(char id, float angle, short int off_set);
+    void save_command(char id, float angle);
     void send_command();
-    short int pwm_convert(float angle, short int off_set);
     void write_mp(move_para in_mp);
 };
 

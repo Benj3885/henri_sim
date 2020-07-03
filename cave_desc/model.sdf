@@ -13,8 +13,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -36,8 +36,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -59,8 +59,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -82,8 +82,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -105,8 +105,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -128,8 +128,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -151,8 +151,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -174,8 +174,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -197,8 +197,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -220,8 +220,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>
@@ -243,8 +243,8 @@
         <surface>
           <friction>
             <ode>
-              <mu>100</mu>
-              <mu2>100</mu2>
+              <mu>9999999999999999</mu>
+              <mu2>9999999999999999</mu2>
             </ode>
           </friction>
         </surface>

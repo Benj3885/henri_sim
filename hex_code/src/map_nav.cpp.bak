@@ -52,10 +52,44 @@ void map_nav::map_main(){
     map.setGeometry(grid_map::Length(MAP_W, MAP_L), (float)1/GRIDS_PER_METER);
     obsQueue.reserve(1000);
 
+    // DEBUG
     mpub = nm->advertise<grid_map_msgs::GridMap>("/grid_map", 1, true);
     ros::Subscriber ims = nm->subscribe<log_hex::log>("/hex_log", 1, &map_nav::imcb, this);
 
     ros::spin();
+
+    /*grid_map::Index idx;
+
+    for(int i = 0; i < 100; i++){
+        for(int j = 0; j < 100; j++){
+            idx.x() = i;
+            idx.y() = j;
+
+            map.at("elevation", idx) = 0;
+
+            nMap[idx(0)][idx(1)].z = 0;
+            nMap[idx(0)][idx(1)].mapped = 1;
+
+            checkObs(IndexFixed(idx));
+        }
+    }
+
+    usleep(200000);
+
+    nMap[50][50].z = 1;
+    nMap[50][50].mapped = 1;
+    checkObs(IndexFixed(idx));
+    spreadO();
+
+    rs.xg = 53;
+    rs.yg = 47;
+
+    rs.gxg = 47;
+    rs.gyg = 53;
+
+    DWENN();
+
+    while(1){sleep(1);}*/
 }
 
 
@@ -89,6 +123,8 @@ void map_nav::imcb(const log_hex::logConstPtr& msg){
     tf::Quaternion q;
     tf::quaternionMsgToTF(msg->pose.orientation, q);
     tf::Transform t(q, tf::Vector3(tfScalar(p.getX()), tfScalar(p.getY()), tfScalar(p.getZ())));
+
+
     
     for(int i = 0; i < IM_WIDTH; i++){
         for(int j = 0; j < IM_HEIGHT; j++){
@@ -244,39 +280,6 @@ void map_nav::spreadO(){
                     }
                 }
 
-                if(ins(x+1, y+1) && i > 1){
-                    if(nMap[x+1][y+1].O < i){
-                        iTemp = obsVec[vIdx].back();
-                        iTemp.x++;
-                        iTemp.y++;
-                        obsVec[!vIdx].push_back(iTemp);
-                    }
-                }
-                if(ins(x-1, y-1) && i > 1){
-                    if(nMap[x-1][y-1].O < i){
-                        iTemp = obsVec[vIdx].back();
-                        iTemp.x--;
-                        iTemp.y--;
-                        obsVec[!vIdx].push_back(iTemp);
-                    }
-                }
-                if(ins(x+1, y-1) && i > 1){
-                    if(nMap[x+1][y-1].O < i){
-                        iTemp = obsVec[vIdx].back();
-                        iTemp.x++;
-                        iTemp.y--;
-                        obsVec[!vIdx].push_back(iTemp);
-                    }
-                }
-                if(ins(x-1, y+1) && i > 1){
-                    if(nMap[x-1][y+1].O < i){
-                        iTemp = obsVec[vIdx].back();
-                        iTemp.x--;
-                        iTemp.y++;
-                        obsVec[!vIdx].push_back(iTemp);
-                    }
-                }
-
                 obsVec[vIdx].pop_back();
             }
         }
@@ -352,13 +355,19 @@ void map_nav::DWENN(){
     int x, y;
     ros::Rate r(10);
 
+    // DEBUG
+    /*bool debug = 0;
+    int debugCounter = 0;*/
+
     while(rs.xg != rs.gxg || rs.yg != rs.gyg){
+
         poseMtx->lock();
         x = rs.xg;
         y = rs.yg;
         poseMtx->unlock();
 
-        while((nMap[x][y].stage != 2 && !nMap[x][y].O) || formX != x || formY != y){
+        // DEBUG
+        withObs: while((nMap[x][y].stage != 2 && !nMap[x][y].O) || formX != x || formY != y/* || (debug && debugCounter < 11)*/){
             formX = x;
             formY = y;
 
@@ -372,15 +381,55 @@ void map_nav::DWENN(){
                 cont->write_mp(mp);
 
                 tarQueue->clear();
-
-                nMap[rs.gxg][rs.gyg].val = 0;
-                nMap[rs.gxg][rs.gyg].stage = 0;
-                resetNMap();
                 return;
             }
+
+            // DEBUG
+            /*std::cout << "New round:" << std::endl;
+
+            for(int i = 47; i < 54; i++){
+                for(int j = 47; j < 54; j++){
+                    std::cout << std::setfill(' ') << std::setw(7) << nMap[i][j].val;
+                    std::cout << "     "; 
+                }
+
+                std::cout << std::endl << std::endl << std::endl;
+            }
+
+            std::cout << std::endl << std::endl;
+
+            for(int i = 47; i < 54; i++){
+                for(int j = 47; j < 54; j++){
+                    std::cout << std::setfill(' ') << std::setw(7) << nMap[i][j].stage;
+                    std::cout << "     "; 
+                }
+
+                std::cout << std::endl << std::endl << std::endl;
+            }
+
+            std::cout << std::endl << std::endl;
+
+            for(int i = 47; i < 54; i++){
+                for(int j = 47; j < 54; j++){
+                    std::cout << std::setfill(' ') << std::setw(7) << rzW[nMap[i][j].w];
+                    std::cout << "     "; 
+                }
+
+                std::cout << std::endl << std::endl << std::endl;
+            }
+            if(debug){
+                debugCounter++;
+            }*/
         }
 
-        determineDirection();
+        // DEBUG
+        //determineDirection();
+        /*debug = 1;
+        nMap[50][50].z = 1;
+        nMap[50][50].mapped = 1;
+        checkObs(IndexFixed(50, 50));
+        spreadO();
+        goto withObs;*/
 
         r.sleep();
     }
@@ -398,7 +447,7 @@ void map_nav::DWENN(){
 
     while(fabsf(tempTurn) > 0.1){
         poseMtx->lock();
-        float rz = rs.rz;
+            float rz = rs.rz;
         poseMtx->unlock();
 
         if(fabsf(rz - rs.grz) > M_PI){
@@ -436,12 +485,12 @@ void map_nav::determineDirection(){
 
     float tempTurn = rzW[w] - rz;
 
+    /*std::cout << "Own val:  " << nMap[x][y].val << "  O:  " << nMap[x][y].O; 
     if(nMap[x][y].wp != NULL)
         std::cout << "  Tar val:  " << nMap[x][y].wp->val << "  Tar O:  " << nMap[x][y].wp->O << std::endl;
     std::cout << "Goal:      " << rs.gxg << ", " << rs.gyg << std::endl;
-    std::cout << "Current:   " << x << ", " << y << std::endl;
+    std::cout << "Current:   " << x << ", " << y << std::endl;*/
     std::cout << tempTurn << " = " << rzW[w] << " - " << rz << std::endl << std::endl;
-
 
     if(fabsf(tempTurn) > 0.15){
         mp.turn = tempTurn;

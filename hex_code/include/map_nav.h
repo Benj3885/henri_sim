@@ -18,17 +18,17 @@
 #define H_FOV 1.57079632679
 #define MAP_L 10
 #define MAP_W 10
-#define GRIDS_PER_METER 20
+#define GRIDS_PER_METER 10
 #define TOTAL_IDX MAP_L * GRIDS_PER_METER
-#define O_VAL 8
+#define O_VAL 2
 
 struct neuron{
     float z = NAN;
     unsigned int val = 0;
-    char stage = 0;
+    int stage = 0;
     bool formerVal = 0;
     int O = 0;
-    char w = 0;
+    int w = 0;
     neuron *wp = NULL;
     bool mapped = 0;
 
@@ -44,7 +44,8 @@ struct neuron{
         val = 0;
         stage = 0;
         wp = NULL;
-        w = 0;
+        if(!O)
+            w = 0;
     }
 };
 
@@ -85,7 +86,7 @@ struct robotState{
 };
 
 struct map_nav{
-    std::mutex *mtx;
+    std::mutex *poseMtx;
     ros::NodeHandle *nm;
     ros::Publisher mpub;
 
@@ -93,40 +94,44 @@ struct map_nav{
     grid_map::GridMap map = grid_map::GridMap({"elevation"});
     neuron nMap[MAP_L*GRIDS_PER_METER][MAP_W*GRIDS_PER_METER];
     std::vector<IndexFixed> obsQueue;
+    bool debug = 0;
 
     float ch[IM_WIDTH];
     float sh[IM_WIDTH];
     float cv[IM_HEIGHT];
     float sv[IM_HEIGHT];
 
-    map_nav(ros::NodeHandle *mainn1, ros::NodeHandle *mainn2);
+    map_nav(ros::NodeHandle *mainn1, ros::NodeHandle *mainn2, controller *contIn);
     void map_main();
 
     void imcb(const log_hex::logConstPtr& msg);
     void setPos(float x, float y, float z);
     void checkObs(IndexFixed idx);
-    void insertObsQueue(IndexFixed idx);
     void spreadO();
-    void insertObsVec(std::vector<IndexFixed> &vec, IndexFixed val);
 
     robotState rs;
     ros::NodeHandle *nn;
     std::vector<IndexFixed> activeNeurons;
     std::vector<IndexFixed> pendingNeurons;
+    std::vector<int> deactiveNeurons;
     ros::CallbackQueue *tarQueue;
+    controller *cont;
+    move_para mp;
+    float rzW[4] = {0, M_PI_2, M_PI, -M_PI_2};
+    bool posRead = 0;
 
     void nav_main();
     void tarCB(const geometry_msgs::PoseStampedConstPtr& msg);
     void DWENN();
     
-    
     void updateActiveNeurons();
+    bool replaceActiveNeighbour(int x, int y);
     void updatePendingNeurons();
-    void activateNeighbourNeurons();
+    void determineDirection();
     void resetNMap();
+    void deactivateWave();
 
     bool ins(int x, int y);
-    void checkPend(IndexFixed idx);
     void findPend(IndexFixed idx);
     bool findActiveNeighbour(int x, int y);
 };

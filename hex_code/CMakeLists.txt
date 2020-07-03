@@ -27,8 +27,8 @@ include_directories(
 )
 
 add_executable(control 
-src/main.cpp src/map_nav.cpp src/comm.cpp src/control.cpp
-include/map_nav.h include/comm.h include/control.h
+src/main.cpp src/map_nav.cpp src/control.cpp
+include/map_nav.h include/control.h
 )
 
 target_link_libraries(control 

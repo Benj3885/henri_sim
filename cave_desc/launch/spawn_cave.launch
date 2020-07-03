@@ -2,12 +2,30 @@
 <launch>
     <include file="$(find cave_desc)/launch/spawn_sdf.launch">
         <arg name="robot_name" value="cave" />
-        <arg name="x" value="10.0" />
-        <arg name="y" value="1.0" />
+        <arg name="x" value="65.0" />
+        <arg name="y" value="16.5" />
         <arg name="z" value="-0.3" />
-        <arg name="roll" value="0"/>
-        <arg name="pitch" value="0"/>
+        <arg name="roll" value="0" />
+        <arg name="pitch" value="0" />
         <arg name="yaw" value="0.0" />
         <arg name="sdf_robot_file" value="$(find cave_desc)/model.sdf" />
     </include>
 </launch>
+
+        <!--arg name="robot_name" value="cave" />
+        <arg name="x" value="5.0" />
+        <arg name="y" value="48.5" />
+        <arg name="z" value="-0.3" />
+        <arg name="roll" value="0"/>
+        <arg name="pitch" value="0"/>
+        <arg name="yaw" value="0.0" /-->
+
+
+        <!-- sol 1
+            arg name="robot_name" value="cave" />
+        <arg name="x" value="65.0" />
+        <arg name="y" value="16.5" />
+        <arg name="z" value="-0.3" />
+        <arg name="roll" value="0" />
+        <arg name="pitch" value="0" />
+        <arg name="yaw" value="0.0" /-->

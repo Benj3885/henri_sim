@@ -16,8 +16,6 @@
 controller::controller(ros::NodeHandle *mainn){
     n = mainn;
 
-    time_move = 0.1; // Seconds
-
     mtx = new std::mutex;
 
     std::thread contthread(&controller::main, this);
@@ -49,56 +47,34 @@ void controller::main(){
     cont[16] = n->advertise<std_msgs::Float64>("/henry/lr2_controller/command", 1);
     cont[17] = n->advertise<std_msgs::Float64>("/henry/lr3_controller/command", 1);
 
-    sleep(2);
-
     for(int i = 0; i < 6; i++)
         for(int j = 0; j < 3; j++)
-            save_command(servo_id[i][j], 0, off_set[i][j]);
+            save_command(servo_id[i][j], 0);
 
     send_command();
 
-    sleep(1);
-
-    int interval = 500;
-    auto time_interval = std::chrono::milliseconds(interval);
-    auto time = std::chrono::steady_clock::now();
-    
+    ros::Duration(1).sleep();
+    ros::Duration dur(0.01);
 
     while(1){
         control_gait();
-        time = std::chrono::steady_clock::now() + time_interval;
-        std::this_thread::sleep_until(time);
+        dur.sleep();
     }
 }
 
 void controller::control_gait(){
-    switch(mp.gait){
-        case 1:
-            if(mp.W){
-                tri_gait(1);
-                go_to_zero();
-            }else if(mp.S){
-                tri_gait(0);
-                go_to_zero();
-            }else if(mp.A){
-                turn(1);
-            }else if(mp.D){
-                turn(0);
-            }
-            break;
-        case 2:
-            if(mp.W){
-                climb_gait(1);
-                go_to_zero();
-            }else if(mp.S){
-                climb_gait(0);
-                go_to_zero();
-            }else if(mp.A){
-                turn(1);
-            }else if(mp.D){
-                turn(0);
-            }
-            break;
+    mtx->lock();
+    move_para mpTemp = mp;
+    mtx->unlock();
+
+    if(mpTemp.turn){
+        turn(mpTemp.turn);
+        return;
+    }
+    if(mpTemp.W){
+        tri_gait(1);
+        go_to_zero();
+        return;
     }
 }
 
@@ -108,8 +84,16 @@ void controller::tri_gait(bool dir){
     
     ros::Rate r(10);
     
+    move_para mpTemp;
+
+    go_to_gait_start();
+
     while(1){
-        if(!(dir ? mp.W : mp.S)){
+        mtx->lock();
+        mpTemp = mp;
+        mtx->unlock();
+
+        if(!mpTemp.W){
             return;
         }
 
@@ -121,31 +105,29 @@ void controller::tri_gait(bool dir){
         }
 
         if(first_state){
-            //printf("Was I here twice?\n");
             for(int serv = 0; serv < 3; serv++){
                 //First part up
-                save_command(servo_id[0][serv], k.part1rf[serv][ang], off_set[0][serv]);
-                save_command(servo_id[2][serv], k.part1rb[serv][ang], off_set[2][serv]);
-                save_command(servo_id[4][serv], k.part1lc[serv][ang], off_set[4][serv]);
+                save_command(servo_id[0][serv], k.part1rf[serv][ang]);
+                save_command(servo_id[2][serv], k.part1rb[serv][ang]);
+                save_command(servo_id[4][serv], k.part1lc[serv][ang]);
 
                 //Second part pushes body
-                save_command(servo_id[1][serv], k.part2rc[serv][ang], off_set[1][serv]); //RightCenterLeg
-                save_command(servo_id[3][serv], k.part2lf[serv][ang], off_set[3][serv]); //LeftFrontLeg
-                save_command(servo_id[5][serv], k.part2lb[serv][ang], off_set[5][serv]); //LeftBackLeg
+                save_command(servo_id[1][serv], k.part2rc[serv][ang]); //RightCenterLeg
+                save_command(servo_id[3][serv], k.part2lf[serv][ang]); //LeftFrontLeg
+                save_command(servo_id[5][serv], k.part2lb[serv][ang]); //LeftBackLeg
             }
         } else { 
             for(int serv = 0; serv < 3; serv++){
                 //First part goes down
-                save_command(servo_id[0][serv], k.part2rf[serv][ang], off_set[0][serv]); //RightFrontLeg
-                save_command(servo_id[2][serv], k.part2rb[serv][ang], off_set[2][serv]); //RightBackLeg
-                save_command(servo_id[4][serv], k.part2lc[serv][ang], off_set[4][serv]); //LeftCenterLeg
+                save_command(servo_id[0][serv], k.part2rf[serv][ang]); //RightFrontLeg
+                save_command(servo_id[2][serv], k.part2rb[serv][ang]); //RightBackLeg
+                save_command(servo_id[4][serv], k.part2lc[serv][ang]); //LeftCenterLeg
 
                 //Second part starts to move
-                save_command(servo_id[1][serv], k.part1rc[serv][ang], off_set[1][serv]); //RightCenterLeg
-                save_command(servo_id[3][serv], k.part1lf[serv][ang], off_set[3][serv]); //LeftFrontLeg
-                save_command(servo_id[5][serv], k.part1lb[serv][ang], off_set[5][serv]); //LeftBackLeg
+                save_command(servo_id[1][serv], k.part1rc[serv][ang]); //RightCenterLeg
+                save_command(servo_id[3][serv], k.part1lf[serv][ang]); //LeftFrontLeg
+                save_command(servo_id[5][serv], k.part1lb[serv][ang]); //LeftBackLeg
             }
-            //printf("%d:   %f\n", servo_id[0][1], k.part2rf[1][ang] * M_PI / 180.0);
         }
 
         send_command();
@@ -153,6 +135,29 @@ void controller::tri_gait(bool dir){
     }
 }
 
+void controller::go_to_gait_start(){
+    hc.i = -1;
+    
+    save_command(servo_id[0][1],  45);
+    save_command(servo_id[2][1],  45);
+    save_command(servo_id[4][1], -45);
+
+    save_command(servo_id[0][0], k.part1rf[0][0]);
+    save_command(servo_id[2][0], k.part1rb[0][0]);
+    save_command(servo_id[4][0], k.part1lc[0][0]);
+
+    send_command();
+    ros::Duration(0.2).sleep();
+
+    for(int serv = 0; serv < 3; serv++){
+        save_command(servo_id[0][serv], k.part1rf[serv][0]);
+        save_command(servo_id[2][serv], k.part1rb[serv][0]);
+        save_command(servo_id[4][serv], k.part1lc[serv][0]);
+    }
+
+    send_command();
+    ros::Duration(0.2).sleep();
+}
 
 void controller::climb_gait(bool dir){
     
@@ -162,7 +167,7 @@ void controller::climb_gait(bool dir){
     ros::Rate r(10);
     
     while(1){
-        if(!(dir ? mp.W : mp.S)){
+        if(!(dir ? mp.W : mp.S) && ang == RESOLUTION){
             return;
         }
 
@@ -176,42 +181,42 @@ void controller::climb_gait(bool dir){
         switch(state){
             case 0:
                 for(int serv = 0; serv < 3; serv++){
-                    save_command(servo_id[0][serv], k.part2rfc[serv][ang], off_set[0][serv]);
+                    save_command(servo_id[0][serv], k.part2rfc[serv][ang]);
                 }
                 break;
             case 1:
                 for(int serv = 0; serv < 3; serv++){
-                    save_command(servo_id[3][serv], k.part2lfc[serv][ang], off_set[3][serv]);
+                    save_command(servo_id[3][serv], k.part2lfc[serv][ang]);
                 }
                 break;
             case 2:
                 for(int serv = 0; serv < 3; serv++){
-                    save_command(servo_id[2][serv], k.part2rb[serv][ang], off_set[2][serv]);
+                    save_command(servo_id[2][serv], k.part2rb[serv][ang]);
                 }
                 break;
             case 3:
                 for(int serv = 0; serv < 3; serv++){
-                    save_command(servo_id[5][serv], k.part2lb[serv][ang], off_set[5][serv]);
+                    save_command(servo_id[5][serv], k.part2lb[serv][ang]);
                 }
                 break;
             case 4:
                 for(int serv = 0; serv < 3; serv++){
-                    save_command(servo_id[1][serv], k.part2rc[serv][ang], off_set[1][serv]);
+                    save_command(servo_id[1][serv], k.part2rc[serv][ang]);
                 }
                 break;
             case 5:
                 for(int serv = 0; serv < 3; serv++){
-                    save_command(servo_id[4][serv], k.part2lc[serv][ang], off_set[4][serv]);
+                    save_command(servo_id[4][serv], k.part2lc[serv][ang]);
                 }
                 break;
             case 6:
                 for(int serv = 0; serv < 3; serv++){
-                    save_command(servo_id[0][serv], k.part1rfc[serv][ang], off_set[0][serv]);
-                    save_command(servo_id[1][serv], k.part1rc[serv][ang], off_set[1][serv]);
-                    save_command(servo_id[2][serv], k.part1rb[serv][ang], off_set[2][serv]);
-                    save_command(servo_id[3][serv], k.part1lfc[serv][ang], off_set[3][serv]);
-                    save_command(servo_id[4][serv], k.part1lc[serv][ang], off_set[4][serv]);
-                    save_command(servo_id[5][serv], k.part1lb[serv][ang], off_set[5][serv]);
+                    save_command(servo_id[0][serv], k.part1rfc[serv][ang]);
+                    save_command(servo_id[1][serv], k.part1rc[serv][ang]);
+                    save_command(servo_id[2][serv], k.part1rb[serv][ang]);
+                    save_command(servo_id[3][serv], k.part1lfc[serv][ang]);
+                    save_command(servo_id[4][serv], k.part1lc[serv][ang]);
+                    save_command(servo_id[5][serv], k.part1lb[serv][ang]);
                 }
                 break;
         }
@@ -222,16 +227,13 @@ void controller::climb_gait(bool dir){
 }
 
 
-void controller::save_command(char id, float angle, short int off_set){
+void controller::save_command(char id, float angle){
     mess[id].data = angle * M_PI / 180.0; 
-    //printf("id:   %d\n", id);
 }
 
 void controller::send_command(){
-    for(int i = 0; i < 18; i++){
+    for(int i = 0; i < 18; i++)
         cont[i].publish(mess[i]);
-    }
-    //printf("send:   %f\n", mess[1].data);
 }
 
 
@@ -239,9 +241,9 @@ void controller::go_to_zero(){
     hc.i = -1;
 
     for(int i = 0; i < 2; i++){
-        save_command(servo_id[1][1+i], 0, off_set[1][1+i]);
-        save_command(servo_id[3][1+i], 0, off_set[3][1+i]);
-        save_command(servo_id[5][1+i], 0, off_set[5][1+i]);
+        save_command(servo_id[1][1+i], 0);
+        save_command(servo_id[3][1+i], 0);
+        save_command(servo_id[5][1+i], 0);
     }
 
 
@@ -249,39 +251,55 @@ void controller::go_to_zero(){
     ros::Duration(0.2).sleep();
 
     for(int i = 0; i < 2; i++){
-        save_command(servo_id[0+i][1], 45,          off_set[0+i][1]);
-        save_command(servo_id[2+i][1], 45 - 90 * i, off_set[2+i][1]);
-        save_command(servo_id[4+i][1], -45,         off_set[4+i][1]);
+        save_command(servo_id[0+i][1], 45);
+        save_command(servo_id[2+i][1], 45 - 90 * i);
+        save_command(servo_id[4+i][1], -45);
 
         send_command();
         ros::Duration(0.2).sleep();
 
         for(int j = 0; j < 3; j++)
-            save_command(servo_id[j*2+i][0], 0, off_set[j*2+i][0]);
+            save_command(servo_id[j*2+i][0], 0);
 
         send_command();
         ros::Duration(0.2).sleep();
 
         for(int j = 1; j < 3; j++)
             for(int k = 0; k < 3; k++)
-                save_command(servo_id[k*2+i][j], 0, off_set[k*2+i][j]);
+                save_command(servo_id[k*2+i][j], 0);
 
         send_command();
         ros::Duration(0.2).sleep();
     }
 }
 
-void controller::turn(bool ccw){
+void controller::turn(float turn){
     ros::Rate r(10);
 
-    newRound: for(int ang = 0; ang < RESOLUTION; ang++){
+
+    float tempf = fabsf(turn);
+
+    if(tempf > turnLimit)
+        tempf = turnLimit;
+
+    k.turnPos[0][1] = tempf;
+    k.turnPos[0][2] = tempf;
+    k.turnPos[0][3] = tempf/2;
+
+    bool ccw = (turn > 0); 
+
+    k.create_turn_gait(k.turnPos, k.rc, -M_PI/2, M_PI/2, k.off_set_coordc, k.part1rrotc, k.part2rrotc, k.part1lrotc, k.part2lrotc);
+    k.create_turn_gait(k.turnPos, k.rfb, -0.7444, M_PI/4, k.off_set_coordf, k.part1rrotf, k.part2rrotf, k.part1lrotf, k.part2lrotf);
+    k.create_turn_gait(k.turnPos, k.rfb, -M_PI+0.7444, M_PI*3/4, k.off_set_coordb, k.part1rrotb, k.part2rrotb, k.part1lrotb, k.part2lrotb);
+
+    for(int ang = 0; ang < RESOLUTION; ang++){
         for(int serv = 0; serv < 3; serv++){
-            save_command(servo_id[0][serv], (!ccw && serv == 0 ? -k.part1rrotf[serv][ang] : k.part1rrotf[serv][ang]), off_set[0][serv]);
-            save_command(servo_id[1][serv], (!ccw && serv == 0 ? -k.part1rrotc[serv][ang] : k.part1rrotc[serv][ang]), off_set[1][serv]);
-            save_command(servo_id[2][serv], (!ccw && serv == 0 ? -k.part1rrotb[serv][ang] : k.part1rrotb[serv][ang]), off_set[2][serv]);
-            save_command(servo_id[3][serv], (!ccw && serv == 0 ? -k.part1lrotf[serv][ang] : k.part1lrotf[serv][ang]), off_set[3][serv]);
-            save_command(servo_id[4][serv], (!ccw && serv == 0 ? -k.part1lrotc[serv][ang] : k.part1lrotc[serv][ang]), off_set[4][serv]);
-            save_command(servo_id[5][serv], (!ccw && serv == 0 ? -k.part1lrotb[serv][ang] : k.part1lrotb[serv][ang]), off_set[5][serv]);
+            save_command(servo_id[0][serv], (!ccw && serv == 0 ? -k.part1rrotf[serv][ang] : k.part1rrotf[serv][ang]));
+            save_command(servo_id[1][serv], (!ccw && serv == 0 ? -k.part1rrotc[serv][ang] : k.part1rrotc[serv][ang]));
+            save_command(servo_id[2][serv], (!ccw && serv == 0 ? -k.part1rrotb[serv][ang] : k.part1rrotb[serv][ang]));
+            save_command(servo_id[3][serv], (!ccw && serv == 0 ? -k.part1lrotf[serv][ang] : k.part1lrotf[serv][ang]));
+            save_command(servo_id[4][serv], (!ccw && serv == 0 ? -k.part1lrotc[serv][ang] : k.part1lrotc[serv][ang]));
+            save_command(servo_id[5][serv], (!ccw && serv == 0 ? -k.part1lrotb[serv][ang] : k.part1lrotb[serv][ang]));
         }
 
         send_command();
@@ -290,9 +308,9 @@ void controller::turn(bool ccw){
 
     for(int ang = 0; ang < RESOLUTION; ang++){
         for(int serv = 0; serv < 3; serv++){
-            save_command(servo_id[0][serv], (!ccw && serv == 0 ? -k.part2rrotf[serv][ang] : k.part2rrotf[serv][ang]), off_set[0][serv]);
-            save_command(servo_id[2][serv], (!ccw && serv == 0 ? -k.part2rrotb[serv][ang] : k.part2rrotb[serv][ang]), off_set[2][serv]);
-            save_command(servo_id[4][serv], (!ccw && serv == 0 ? -k.part2lrotc[serv][ang] : k.part2lrotc[serv][ang]), off_set[4][serv]);
+            save_command(servo_id[0][serv], (!ccw && serv == 0 ? -k.part2rrotf[serv][ang] : k.part2rrotf[serv][ang]));
+            save_command(servo_id[2][serv], (!ccw && serv == 0 ? -k.part2rrotb[serv][ang] : k.part2rrotb[serv][ang]));
+            save_command(servo_id[4][serv], (!ccw && serv == 0 ? -k.part2lrotc[serv][ang] : k.part2lrotc[serv][ang]));
         }
         
 
@@ -302,22 +320,18 @@ void controller::turn(bool ccw){
 
     for(int ang = 0; ang < RESOLUTION; ang++){
         for(int serv = 0; serv < 3; serv++){
-            save_command(servo_id[1][serv], (!ccw && serv == 0 ? -k.part2rrotc[serv][ang] : k.part2rrotc[serv][ang]), off_set[1][serv]);
-            save_command(servo_id[3][serv], (!ccw && serv == 0 ? -k.part2lrotf[serv][ang] : k.part2lrotf[serv][ang]), off_set[3][serv]);
-            save_command(servo_id[5][serv], (!ccw && serv == 0 ? -k.part2lrotb[serv][ang] : k.part2lrotb[serv][ang]), off_set[5][serv]);
+            save_command(servo_id[1][serv], (!ccw && serv == 0 ? -k.part2rrotc[serv][ang] : k.part2rrotc[serv][ang]));
+            save_command(servo_id[3][serv], (!ccw && serv == 0 ? -k.part2lrotf[serv][ang] : k.part2lrotf[serv][ang]));
+            save_command(servo_id[5][serv], (!ccw && serv == 0 ? -k.part2lrotb[serv][ang] : k.part2lrotb[serv][ang]));
         }
 
         send_command();
         r.sleep();
     }
-
-    if((ccw ? mp.A : mp.D))
-        goto newRound;
-
 }
 
 void controller::write_mp(move_para in_mp){
-    //std::lock_guard<std::mutex> lock(*mtx);
+    std::lock_guard<std::mutex> lock(*mtx);
     mp = in_mp;
 }
 
@@ -328,16 +342,6 @@ kinematics::kinematics(){
     create_gait(pointPosfc, part1rfc, part2rfc, part1lfc, part2lfc);
     create_gait(pointPosc, part1rc, part2rc, part1lc, part2lc);
     create_gait(pointPosb, part1rb, part2rb, part1lb, part2lb);
-
-    /*for(int i = 0; i < 10; i++){
-        printf("%f   ", part1rf[1][i] * M_PI / 180.0);
-        printf("%f   ", part2rf[1][i] * M_PI / 180.0);
-        printf("\n");
-    }*/
-
-    create_turn_gait(turnPos, rc, -M_PI/2, M_PI/2, off_set_coordc, part1rrotc, part2rrotc, part1lrotc, part2lrotc);
-    create_turn_gait(turnPos, rfb, -0.7444, M_PI/4, off_set_coordf, part1rrotf, part2rrotf, part1lrotf, part2lrotf);
-    create_turn_gait(turnPos, rfb, -M_PI+0.7444, M_PI*3/4, off_set_coordb, part1rrotb, part2rrotb, part1lrotb, part2lrotb);
 }
 
 void kinematics::create_gait(float pointPos[3][5], float part1r[3][RESOLUTION], float part2r[3][RESOLUTION],
